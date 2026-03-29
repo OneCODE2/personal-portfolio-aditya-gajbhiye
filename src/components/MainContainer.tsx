@@ -35,8 +35,6 @@ const MainContainer = ({ children }: PropsWithChildren) => {
       <Navbar />
       <SocialIcons />
       {isDesktopView && children}
-      <div id="smooth-wrapper">
-        <div id="smooth-content">
           <div className="container-main">
             <Landing>{!isDesktopView && children}</Landing>
             <About />
@@ -50,8 +48,6 @@ const MainContainer = ({ children }: PropsWithChildren) => {
             )}
             <Contact />
           </div>
-        </div>
-      </div>
     </div>
   );
 };

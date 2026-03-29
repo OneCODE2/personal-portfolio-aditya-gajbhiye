@@ -2,11 +2,11 @@ import { useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HoverLinks from "./HoverLinks";
 import { gsap } from "gsap";
-import { ScrollSmoother } from "gsap/ScrollSmoother";
+import Lenis from "lenis";
 import "./styles/Navbar.css";
 
-gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
-export let smoother: ScrollSmoother | null = null;
+gsap.registerPlugin(ScrollTrigger);
+export let smoother: Lenis | null = null;
 
 const Navbar = () => {
   useEffect(() => {
@@ -14,18 +14,21 @@ const Navbar = () => {
     const clickHandlers = new Map<HTMLAnchorElement, EventListener>();
 
     if (window.innerWidth > 1024) {
-      smoother = ScrollSmoother.create({
-        wrapper: "#smooth-wrapper",
-        content: "#smooth-content",
-        smooth: 1.7,
-        speed: 1.7,
-        effects: true,
-        autoResize: true,
-        ignoreMobileResize: true,
+      smoother = new Lenis({
+        duration: 1.5,
+        smoothWheel: true,
       });
 
-      smoother.scrollTop(0);
-      smoother.paused(true);
+      smoother.on("scroll", ScrollTrigger.update);
+
+      gsap.ticker.add((time) => {
+        smoother?.raf(time * 1000);
+      });
+
+      gsap.ticker.lagSmoothing(0);
+
+      window.scrollTo(0, 0);
+      smoother.stop();
     }
 
     links.forEach((elem) => {
@@ -35,7 +38,9 @@ const Navbar = () => {
           e.preventDefault();
           let elem = e.currentTarget as HTMLAnchorElement;
           let section = elem.getAttribute("data-href");
-          smoother?.scrollTo(section, true, "top top");
+          if (section) {
+             smoother?.scrollTo(section, { offset: 0 });
+          }
         }
       };
       clickHandlers.set(element, handler);
@@ -43,7 +48,7 @@ const Navbar = () => {
     });
 
     const resizeHandler = () => {
-      ScrollSmoother.refresh(true);
+      ScrollTrigger.refresh();
     };
 
     window.addEventListener("resize", resizeHandler);
@@ -58,7 +63,7 @@ const Navbar = () => {
       });
 
       window.removeEventListener("resize", resizeHandler);
-      smoother?.kill();
+      smoother?.destroy();
       smoother = null;
     };
   }, []);

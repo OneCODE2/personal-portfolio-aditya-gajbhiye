@@ -52,8 +52,11 @@ const Scene = () => {
       const light = setLighting(scene);
       let progress = setProgress((value) => setLoading(value));
       const { loadCharacter } = setCharacter(renderer, scene, camera);
+      let mounted = true;
+      let resizeHandler: (() => void) | null = null;
 
       loadCharacter().then((gltf) => {
+        if (!mounted) return;
         if (gltf) {
           const animations = setAnimations(gltf);
           hoverDivRef.current && animations.hover(gltf, hoverDivRef.current);
@@ -69,9 +72,9 @@ const Scene = () => {
               animations.startIntro();
             }, 2500);
           });
-          window.addEventListener("resize", () =>
-            handleResize(renderer, camera, canvasDiv, character)
-          );
+          resizeHandler = () =>
+            handleResize(renderer, camera, canvasDiv, character);
+          window.addEventListener("resize", resizeHandler);
         }
       });
 
@@ -98,9 +101,7 @@ const Scene = () => {
         });
       };
 
-      document.addEventListener("mousemove", (event) => {
-        onMouseMove(event);
-      });
+      document.addEventListener("mousemove", onMouseMove);
       const landingDiv = document.getElementById("landingDiv");
       if (landingDiv) {
         landingDiv.addEventListener("touchstart", onTouchStart);
@@ -127,17 +128,18 @@ const Scene = () => {
       };
       animate();
       return () => {
+        mounted = false;
         clearTimeout(debounce);
         scene.clear();
         renderer.dispose();
-        window.removeEventListener("resize", () =>
-          handleResize(renderer, camera, canvasDiv, character!)
-        );
+        if (resizeHandler) {
+          window.removeEventListener("resize", resizeHandler);
+        }
         if (canvasDiv.current) {
           canvasDiv.current.removeChild(renderer.domElement);
         }
+        document.removeEventListener("mousemove", onMouseMove);
         if (landingDiv) {
-          document.removeEventListener("mousemove", onMouseMove);
           landingDiv.removeEventListener("touchstart", onTouchStart);
           landingDiv.removeEventListener("touchend", onTouchEnd);
         }

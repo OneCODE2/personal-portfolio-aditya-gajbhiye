@@ -2,6 +2,11 @@ import SplitType from "split-type";
 import { gsap } from "gsap";
 import { smoother } from "../Navbar";
 
+const splitTextProps = {
+  types: ["chars", "lines"] as Array<"chars" | "lines" | "words">,
+  lineClass: "split-h2",
+};
+
 export function initialFX() {
   document.body.style.overflowY = "auto";
   smoother?.start();
@@ -16,7 +21,7 @@ export function initialFX() {
     // @ts-ignore
     [".landing-info h3", ".landing-intro h2", ".landing-intro h1"],
     {
-      types: "chars,lines",
+      types: ["chars", "lines"],
       lineClass: "split-line",
     }
   );
@@ -34,9 +39,7 @@ export function initialFX() {
     }
   );
 
-  let TextProps = { types: "chars,lines", lineClass: "split-h2" };
-
-  let landingText2 = new SplitType(".landing-h2-info", TextProps);
+  let landingText2 = new SplitType(".landing-h2-info", splitTextProps);
   gsap.fromTo(
     landingText2.chars,
     { opacity: 0, y: 80, filter: "blur(5px)" },
@@ -73,9 +76,9 @@ export function initialFX() {
     }
   );
 
-  let landingText3 = new SplitType(".landing-h2-info-1", TextProps);
-  let landingText4 = new SplitType(".landing-h2-1", TextProps);
-  let landingText5 = new SplitType(".landing-h2-2", TextProps);
+  let landingText3 = new SplitType(".landing-h2-info-1", splitTextProps);
+  let landingText4 = new SplitType(".landing-h2-1", splitTextProps);
+  let landingText5 = new SplitType(".landing-h2-2", splitTextProps);
 
   LoopText(landingText2, landingText3);
   LoopText(landingText4, landingText5);

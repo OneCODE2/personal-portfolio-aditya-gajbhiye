@@ -1,10 +1,8 @@
 import "./styles/Work.css";
 import WorkImage from "./WorkImage";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+import useEmblaCarousel from "embla-carousel-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const projects = [
   {
@@ -97,47 +95,64 @@ const projects = [
 ];
 
 const Work = () => {
-  useGSAP(() => {
-    const scrollBuffer = 20;
-    const section = document.querySelector<HTMLElement>(".work-section");
-    const sticky = document.querySelector<HTMLElement>(".work-sticky");
-    const viewport = document.querySelector<HTMLElement>(".work-marquee-viewport");
-    const track = document.querySelector<HTMLElement>(".work-track");
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+    dragFree: false,
+    loop: true,
+  });
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const autoplayRef = useRef<number | null>(null);
 
-    if (!section || !sticky || !viewport || !track) {
-      return;
-    }
+  const updateScrollState = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
 
-    const getMaxTranslate = () => {
-      const maxTranslate = track.scrollWidth - viewport.clientWidth;
-      return Math.max(maxTranslate, 0);
-    };
+  useEffect(() => {
+    if (!emblaApi) return;
+    updateScrollState();
+    const onPointerDown = () => setIsDragging(true);
+    const onPointerUp = () => setIsDragging(false);
+    const onSettle = () => setIsDragging(false);
 
-    const getScrollDistance = () => {
-      return getMaxTranslate() + scrollBuffer;
-    };
-
-    const tween = gsap.to(track, {
-      x: () => -getMaxTranslate(),
-      ease: "none",
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: () => `+=${getScrollDistance()}`,
-        scrub: true,
-        pin: sticky,
-        pinSpacing: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        id: "work",
-      },
-    });
+    emblaApi.on("select", updateScrollState);
+    emblaApi.on("reInit", updateScrollState);
+    emblaApi.on("pointerDown", onPointerDown);
+    emblaApi.on("pointerUp", onPointerUp);
+    emblaApi.on("settle", onSettle);
 
     return () => {
-      tween.kill();
-      ScrollTrigger.getById("work")?.kill();
+      emblaApi.off("select", updateScrollState);
+      emblaApi.off("reInit", updateScrollState);
+      emblaApi.off("pointerDown", onPointerDown);
+      emblaApi.off("pointerUp", onPointerUp);
+      emblaApi.off("settle", onSettle);
     };
-  }, []);
+  }, [emblaApi, updateScrollState]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    if (autoplayRef.current) {
+      window.clearInterval(autoplayRef.current);
+    }
+
+    autoplayRef.current = window.setInterval(() => {
+      if (!isDragging && !isHovered) {
+        emblaApi.scrollNext();
+      }
+    }, 2500);
+
+    return () => {
+      if (autoplayRef.current) {
+        window.clearInterval(autoplayRef.current);
+      }
+    };
+  }, [emblaApi, isDragging, isHovered]);
 
   return (
     <div className="work-section" id="work">
@@ -146,7 +161,12 @@ const Work = () => {
           <h2>
             My <span>Work</span>
           </h2>
-          <div className="work-marquee-viewport">
+          <div
+            className={`work-marquee-viewport ${isDragging ? "is-dragging" : ""}`}
+            ref={emblaRef}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
             <div className="work-track">
               {projects.map((project, index) => (
                 <div className="work-box" key={project.name}>
@@ -176,7 +196,12 @@ const Work = () => {
                       <div className="work-back-meta">
                         <span>{project.category}</span>
                         {project.link && (
-                          <a href={project.link} target="_blank" rel="noreferrer">
+                          <a
+                            href={project.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(event) => event.stopPropagation()}
+                          >
                             Open project
                           </a>
                         )}
@@ -186,6 +211,26 @@ const Work = () => {
                 </div>
               ))}
             </div>
+          </div>
+          <div className="work-carousel-controls work-carousel-controls-bottom">
+            <button
+              type="button"
+              className="work-nav-btn"
+              onClick={() => emblaApi?.scrollPrev()}
+              disabled={!canScrollPrev}
+              aria-label="Previous project"
+            >
+              <IoIosArrowBack />
+            </button>
+            <button
+              type="button"
+              className="work-nav-btn"
+              onClick={() => emblaApi?.scrollNext()}
+              disabled={!canScrollNext}
+              aria-label="Next project"
+            >
+              <IoIosArrowForward />
+            </button>
           </div>
         </div>
       </div>

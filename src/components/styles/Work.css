@@ -1,19 +1,19 @@
 .work-section {
   position: relative;
   background-color: var(--backgroundColor);
-  min-height: 100vh;
+  padding-bottom: 40px;
 }
 
 .work-sticky {
-  height: 100vh;
+  position: static;
+  height: auto;
   display: flex;
   align-items: stretch;
 }
 
 .work-container {
-  margin: auto;
+  margin: 0 auto;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -32,28 +32,33 @@
 }
 
 .work-marquee-viewport {
-  flex: 1;
+  margin-top: 18px;
   position: relative;
   overflow: hidden;
   border-top: 1px solid #363636;
   border-bottom: 1px solid #363636;
+  touch-action: pan-y;
 }
 
 .work-track {
-  height: 100%;
+  min-height: 560px;
   display: flex;
-  width: max-content;
-  will-change: transform;
+  align-items: stretch;
+  user-select: none;
 }
 
 .work-box {
-  width: 560px;
+  flex: 0 0 560px;
   height: 100%;
-  flex-shrink: 0;
   padding: 44px;
   box-sizing: border-box;
   border-right: 1px solid #363636;
   perspective: 1400px;
+  cursor: grab;
+}
+
+.work-box:active {
+  cursor: grabbing;
 }
 
 .work-card-inner {
@@ -62,6 +67,7 @@
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.7s cubic-bezier(0.2, 0.6, 0.2, 1);
+  cursor: pointer;
 }
 
 .work-box:hover .work-card-inner,
@@ -110,7 +116,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-top: 14px;
+  margin-top: auto;
 }
 
 .work-back-meta span {
@@ -142,6 +148,11 @@
 
 .work-title > div {
   text-align: right;
+  border: 1px solid #3a3342;
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-width: 260px;
+  background: rgba(20, 16, 25, 0.7);
 }
 
 .work-title h3 {
@@ -218,6 +229,43 @@
   max-width: 100%;
   max-height: 320px;
   border-radius: 12px;
+  -webkit-user-drag: none;
+}
+
+.work-carousel-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.work-carousel-controls-bottom {
+  margin-top: 18px;
+}
+
+.work-nav-btn {
+  border: 1px solid #4d3f5f;
+  background-color: #19131f;
+  color: #f2e4ff;
+  border-radius: 999px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.work-nav-btn:hover:not(:disabled) {
+  background-color: #251c2f;
+  border-color: #c7a4ff;
+}
+
+.work-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 @media only screen and (max-width: 1400px) {
@@ -227,7 +275,7 @@
   }
 
   .work-box {
-    width: 460px;
+    flex-basis: 460px;
     padding: 32px;
   }
 
@@ -250,13 +298,13 @@
 }
 
 @media only screen and (max-width: 1025px) {
-  .work-sticky {
-    height: auto;
+  .work-section {
+    padding-bottom: 40px;
   }
 
-  .work-section {
-    min-height: auto;
-    padding-bottom: 40px;
+  .work-sticky {
+    position: static;
+    height: auto;
   }
 
   .work-section h2 {
@@ -265,20 +313,20 @@
   }
 
   .work-marquee-viewport {
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-  .work-track {
-    transform: none !important;
+    overflow: hidden;
   }
 
   .work-box {
-    width: min(86vw, 360px);
+    flex: 0 0 min(86vw, 360px);
     height: auto;
     min-height: 420px;
     padding: 20px;
     perspective: none;
+  }
+
+  .work-title > div {
+    min-width: auto;
+    padding: 8px 10px;
   }
 
   .work-card-inner {
@@ -297,5 +345,9 @@
 
   .work-card-back {
     display: none;
+  }
+
+  .work-carousel-controls {
+    justify-content: center;
   }
 }

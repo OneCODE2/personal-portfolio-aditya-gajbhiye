@@ -27,7 +27,7 @@ const MainContainer = ({ children }: PropsWithChildren) => {
     return () => {
       window.removeEventListener("resize", resizeHandler);
     };
-  }, [isDesktopView]);
+  }, []);
 
   return (
     <div className="container-main">
@@ -35,19 +35,17 @@ const MainContainer = ({ children }: PropsWithChildren) => {
       <Navbar />
       <SocialIcons />
       {isDesktopView && children}
-          <div className="container-main">
-            <Landing>{!isDesktopView && children}</Landing>
-            <About />
-            <WhatIDo />
-            <Career />
-            <Work />
-            {isDesktopView && (
-              <Suspense fallback={<div>Loading....</div>}>
-                <TechStack />
-              </Suspense>
-            )}
-            <Contact />
-          </div>
+      <Landing>{!isDesktopView && children}</Landing>
+      <About />
+      <WhatIDo />
+      <Career />
+      <Work />
+      {isDesktopView && (
+        <Suspense fallback={<div>Loading....</div>}>
+          <TechStack />
+        </Suspense>
+      )}
+      <Contact />
     </div>
   );
 };

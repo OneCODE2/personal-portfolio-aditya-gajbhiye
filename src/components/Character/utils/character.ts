@@ -15,16 +15,10 @@ const setCharacter = (
 
   const loadCharacter = () => {
     return new Promise<GLTF | null>(async (resolve, reject) => {
-      try {
-        const encryptedBlob = await decryptFile(
-          "/models/character.enc",
-          "Character3D#@"
-        );
-        const blobUrl = URL.createObjectURL(new Blob([encryptedBlob]));
-
+      const finishLoad = (modelUrl: string) => {
         let character: THREE.Object3D;
         loader.load(
-          blobUrl,
+          modelUrl,
           async (gltf) => {
             character = gltf.scene;
             await renderer.compileAsync(character, camera, scene);
@@ -39,8 +33,8 @@ const setCharacter = (
             resolve(gltf);
             setCharTimeline(character, camera);
             setAllTimeline();
-            character!.getObjectByName("footR")!.position.y = 3.36;
-            character!.getObjectByName("footL")!.position.y = 3.36;
+            character.getObjectByName("footR")!.position.y = 3.36;
+            character.getObjectByName("footL")!.position.y = 3.36;
             dracoLoader.dispose();
           },
           undefined,
@@ -49,9 +43,21 @@ const setCharacter = (
             reject(error);
           }
         );
+      };
+
+      try {
+        const encryptedBlob = await decryptFile(
+          "/models/character.enc",
+          "Character3D#@"
+        );
+        const blobUrl = URL.createObjectURL(new Blob([encryptedBlob]));
+        finishLoad(blobUrl);
       } catch (err) {
-        reject(err);
-        console.error(err);
+        console.warn(
+          "Encrypted character load failed. Falling back to /models/character.glb",
+          err
+        );
+        finishLoad("/models/character.glb");
       }
     });
   };

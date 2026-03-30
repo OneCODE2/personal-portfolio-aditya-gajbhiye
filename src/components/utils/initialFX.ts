@@ -34,7 +34,7 @@ export function initialFX() {
     }
   );
 
-  let TextProps = { types: "chars,lines", lineClass: "split-h2" };
+  let TextProps = { types: "chars,lines" as "chars,lines", lineClass: "split-h2" };
 
   let landingText2 = new SplitType(".landing-h2-info", TextProps);
   gsap.fromTo(
